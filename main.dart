@@ -8,18 +8,20 @@ late File pubspecFile;
 void main(List<String> args) async {
   initializePubspecFile(args);
   final List<Package> packages = extractPackagesFromPubspec();
-  final List<Package> updatedPackages =
-      await fetchLatestVersionsForPackages(packages);
+  final List<Package> updatedPackages = await fetchLatestVersionsForPackages(
+    packages,
+  );
   await updatePubspecFileWithNewVersions(updatedPackages);
   print(
-      "Package upgrade process completed successfully. Thank you for using the Flutter Package Upgrade Assistant. Please consider rating it on GitHub.");
+    "Package upgrade process completed successfully. Thank you for using the Flutter Package Upgrade Assistant. Please consider rating it on GitHub.",
+  );
   print("https://github.com/sharmadhiraj/flutter-package-upgrade-assistant");
 }
 
 List<Package> extractPackagesFromPubspec() {
-  final String dependenciesSection = pubspecFile
-      .readAsStringSync()
-      .split(RegExp(r'dependencies:|dev_dependencies:'))[1];
+  final String dependenciesSection = pubspecFile.readAsStringSync().split(
+    RegExp(r'dependencies:|dev_dependencies:'),
+  )[1];
   final List<String> dependencies = dependenciesSection.split("\n");
   final List<Package> packages = [];
   dependencies.forEach((dependency) {
@@ -27,7 +29,8 @@ List<Package> extractPackagesFromPubspec() {
     if (cleanedDependency.isEmpty ||
         cleanedDependency == "flutter:" ||
         cleanedDependency == "sdk: flutter" ||
-        !RegExp(r'^[a-z0-9_]+: .+$').hasMatch(cleanedDependency)) return;
+        !RegExp(r'^[a-z0-9_]+: .+$').hasMatch(cleanedDependency))
+      return;
     final List<String> dependencyParts = cleanedDependency.split(":");
     if (dependencyParts.length != 2) return;
     packages.add(
@@ -60,11 +63,13 @@ Future<String?> fetchLatestVersionForPackage(String packageName) async {
       return content;
     } else {
       print(
-          "Failed to fetch the latest version for $packageName. Status code: ${response.statusCode}");
+        "Failed to fetch the latest version for $packageName. Status code: ${response.statusCode}",
+      );
     }
   } catch (error) {
     print(
-        "An error occurred while fetching the latest version for $packageName: $error");
+      "An error occurred while fetching the latest version for $packageName: $error",
+    );
   } finally {
     client.close();
   }
@@ -72,14 +77,14 @@ Future<String?> fetchLatestVersionForPackage(String packageName) async {
 }
 
 Future<List<Package>> fetchLatestVersionsForPackages(
-    List<Package> packages) async {
-  final List<Package> updatedPackages = [];
-  for (Package package in packages) {
-    final String? latestVersion =
-        await fetchLatestVersionForPackage(package.name);
-    package.newVersion = latestVersion;
-    updatedPackages.add(package);
-  }
+  List<Package> packages,
+) async {
+  final List<Package> updatedPackages = await Future.wait(
+    packages.map((pkg) async {
+      final latest = await fetchLatestVersionForPackage(pkg.name);
+      return pkg.copyWith(newVersion: latest);
+    }),
+  );
   print(
     "Checked ${updatedPackages.length} packages on pub.dev. Found updates for ${updatedPackages.where((pkg) => pkg.hasNewVersion()).length} packages.",
   );
@@ -87,12 +92,14 @@ Future<List<Package>> fetchLatestVersionsForPackages(
 }
 
 Future<void> updatePubspecFileWithNewVersions(
-    List<Package> updatedPackages) async {
+  List<Package> updatedPackages,
+) async {
   String pubspecContent = pubspecFile.readAsStringSync();
   for (Package package in updatedPackages) {
     if (package.hasNewVersion()) {
       print(
-          "Updating ${package.name} from version ${package.version} to ${package.newVersion}");
+        "Updating ${package.name} from version ${package.version} to ${package.newVersion}",
+      );
       pubspecContent = pubspecContent.replaceAll(
         package.raw,
         package.getNewVersionRaw(),

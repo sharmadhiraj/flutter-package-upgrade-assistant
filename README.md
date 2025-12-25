@@ -6,13 +6,13 @@ A Dart script to assist in upgrading Flutter package versions in the `pubspec.ya
 
 #### Important Note: Flutter's Built-in Command for Upgrades
 
-With the release of Flutter 2.0, you can easily upgrade all the packages in your project to the
-latest major versions by running the following command:
-
-`flutter pub upgrade --major-versions`
-
-This built-in command performs much of the functionality that this tool was originally designed to
-do, making it easier to keep your pubspec.yaml up to date.
+> With the release of Flutter 2.0, you can upgrade all the packages in your project to the
+> latest major versions by running the following command:
+>
+> `flutter pub upgrade --major-versions`
+>
+> This built-in command performs much of the functionality that this tool was originally designed to
+> do, making it easier to keep your pubspec.yaml up to date.
 
 <hr/>
 

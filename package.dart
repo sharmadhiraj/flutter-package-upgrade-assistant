@@ -4,9 +4,23 @@ class Package {
   final String raw;
   final String name;
   final String version;
-  String? newVersion;
+  final String? newVersion;
 
-  Package({required this.raw, required this.name, required this.version});
+  const Package({
+    required this.raw,
+    required this.name,
+    required this.version,
+    this.newVersion,
+  });
+
+  Package copyWith({String? newVersion}) {
+    return Package(
+      raw: raw,
+      name: name,
+      version: version,
+      newVersion: newVersion ?? this.newVersion,
+    );
+  }
 
   @override
   String toString() {
